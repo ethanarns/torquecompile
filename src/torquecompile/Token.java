@@ -1,11 +1,16 @@
 package torquecompile;
 
 public class Token {
-    public String lexeme;
+    public Lexeme lex;
     public String value;
 
-    public Token(String lexeme, String value) {
-        lexeme = this.lexeme;
-        value = this.value;
+    public Token(Lexeme lexeme, String value) {
+        this.lex = lexeme;
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + lex + ",\"" + value + "\")";
     }
 }
