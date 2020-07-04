@@ -2,15 +2,9 @@ package torquecompile;
 
 import java.util.ArrayList;
 
-public class TorqueCompile {
-    public static void main(String[] args) throws Exception {
-        System.out.println("Starting...");
-        TorqueCompile tcomp = new TorqueCompile();
-        String testCode = "int i = 2* j; string str = \"asdf\"; function(int x, float y){ x = rejigger(x);return x*y; }";
-        System.out.println(tcomp.parse(testCode));
-    }
+public class Lexer {
 
-    public TorqueCompile() {}
+    public Lexer() {}
 
     private ArrayList<Token> parseStrings(String li) {
         li = li.trim();
