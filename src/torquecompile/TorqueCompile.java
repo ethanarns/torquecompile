@@ -6,13 +6,13 @@ public class TorqueCompile {
     public static void main(String[] args) throws Exception {
         System.out.println("Starting...");
         TorqueCompile tcomp = new TorqueCompile();
-        String testCode = "int i = 2* j; string str = \"asdf\";";
+        String testCode = "int i = 2* j; string str = \"asdf\"; function(int x, float y){ x = rejigger(x);return x*y; }";
         System.out.println(tcomp.parse(testCode));
     }
 
     public TorqueCompile() {}
 
-    public ArrayList<Token> parseStrings(String li) {
+    private ArrayList<Token> parseStrings(String li) {
         li = li.trim();
         ArrayList<Token> tokens = new ArrayList<Token>();
         boolean inString = false;
@@ -46,7 +46,7 @@ public class TorqueCompile {
         return tokens;
     }
 
-    public ArrayList<Token> parseLine(String str) {
+    private ArrayList<Token> parseLine(String str) {
         // This function is to be run after parseStrings
         ArrayList<Token> finalTokens = new ArrayList<Token>();
         String built = "";
@@ -98,7 +98,7 @@ public class TorqueCompile {
         ArrayList<Token> finalTokens = new ArrayList<Token>();
         input = input.replace("\n",";");
         ArrayList<Token> tokens = parseStrings(input);
-        System.out.println(tokens);
+        // Split up post-string Tokens
         for (int i = 0; i < tokens.size(); i++) {
             Token t = tokens.get(i);
             if (t.lex == Lexeme.STRING) {
@@ -108,6 +108,33 @@ public class TorqueCompile {
                 String subTokenData = t.value;
                 subTokens = parseLine(subTokenData);
                 finalTokens.addAll(subTokens);
+            }
+        }
+        // Split up and name the rest
+        finalTokens = parseTokens(finalTokens);
+        return finalTokens;
+    }
+
+    private ArrayList<Token> parseTokens(ArrayList<Token> tokens) {
+        ArrayList<Token> finalTokens = new ArrayList<Token>();
+        for (int i = 0; i < tokens.size(); i++) {
+            Token t = tokens.get(i);
+            if (t.lex == Lexeme.UNPARSED) {
+                String valueString = t.value.trim();
+                // First, try Types
+                if (valueString.startsWith("global") ||
+                valueString.startsWith("string") ||
+                valueString.startsWith("int") ||
+                valueString.startsWith("float")) {
+                    finalTokens.add(new Token(Lexeme.DECLARE,valueString));
+                // Next, just functions
+                } else if (valueString.equals("function")) {
+                    finalTokens.add(new Token(Lexeme.FUNCTION,valueString));
+                } else {
+                    finalTokens.add(new Token(Lexeme.UNPARSED,valueString));
+                }
+            } else {
+                finalTokens.add(t);
             }
         }
         return finalTokens;

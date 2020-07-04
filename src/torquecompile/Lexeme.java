@@ -7,5 +7,7 @@ public enum Lexeme {
     VARIABLE,
     OPERATOR,
     CONTROL,
-    NEWLINE
+    NEWLINE,
+    DECLARE,
+    FUNCTION
 }
