@@ -6,14 +6,13 @@ public class TorqueCompile {
     public static void main(String[] args) throws Exception {
         System.out.println("Starting...");
         TorqueCompile tcomp = new TorqueCompile();
-        String testCode = "string str = \"asdf\"; string str2 = \"fd\\\"sa\";";
-        Token tokens[] = tcomp.parseStrings(testCode);
-
+        String testCode = "int i = 2* j; string str = \"asdf\";";
+        System.out.println(tcomp.parse(testCode));
     }
 
     public TorqueCompile() {}
 
-    public Token[] parseStrings(String li) {
+    public ArrayList<Token> parseStrings(String li) {
         li = li.trim();
         ArrayList<Token> tokens = new ArrayList<Token>();
         boolean inString = false;
@@ -34,6 +33,83 @@ public class TorqueCompile {
         if (inString) {
             System.out.println("Strings did not terminate properly!");
         }
-        return (Token[])tokens.toArray();
+        for (int j = 0; j < tokens.size(); j++) {
+            Token t = tokens.get(j);
+            if (t.lex == Lexeme.UNPARSED) {
+                t.value = t.value.replace("\"","");
+                t.value = t.value.trim();
+            } else if (t.lex == Lexeme.STRING) {
+                // Remove last character, which will always be a double quote
+                t.value = t.value.substring(0,t.value.length()-1);
+            }
+        }
+        return tokens;
+    }
+
+    public ArrayList<Token> parseLine(String str) {
+        // This function is to be run after parseStrings
+        ArrayList<Token> finalTokens = new ArrayList<Token>();
+        String built = "";
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            switch (c) {
+                case '+':
+                case '-':
+                case '/':
+                case '*':
+                case '%':
+                case '=':
+                    if (built.length() != 0) {
+                        finalTokens.add(new Token(Lexeme.UNPARSED, built.trim()));
+                    }
+                    built = "";
+                    finalTokens.add(new Token(Lexeme.OPERATOR, String.valueOf(c)));
+                    break;
+                case '(':
+                case ')':
+                case '{':
+                case '}':
+                    if (built.length() != 0) {
+                        finalTokens.add(new Token(Lexeme.UNPARSED, built.trim()));
+                    }
+                    built = "";
+                    finalTokens.add(new Token(Lexeme.CONTROL, String.valueOf(c)));
+                    break;
+                case '\n':
+                case ';':
+                    if (built.length() != 0) {
+                        finalTokens.add(new Token(Lexeme.UNPARSED, built.trim()));
+                    }
+                    built = "";
+                    finalTokens.add(new Token(Lexeme.NEWLINE, "N/A"));
+                    break;
+                default:
+                    built += c;
+                    break;
+            }
+        }
+        if (built.length() != 0) {
+            finalTokens.add(new Token(Lexeme.UNPARSED,built.trim()));
+        }
+        return finalTokens;
+    }
+
+    public ArrayList<Token> parse(String input) {
+        ArrayList<Token> finalTokens = new ArrayList<Token>();
+        input = input.replace("\n",";");
+        ArrayList<Token> tokens = parseStrings(input);
+        System.out.println(tokens);
+        for (int i = 0; i < tokens.size(); i++) {
+            Token t = tokens.get(i);
+            if (t.lex == Lexeme.STRING) {
+                finalTokens.add(t);
+            } else {
+                ArrayList<Token> subTokens;
+                String subTokenData = t.value;
+                subTokens = parseLine(subTokenData);
+                finalTokens.addAll(subTokens);
+            }
+        }
+        return finalTokens;
     }
 }

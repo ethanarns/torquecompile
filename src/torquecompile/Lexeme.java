@@ -4,5 +4,8 @@ public enum Lexeme {
     UNPARSED,
     STRING,
     INTEGER,
-    VARIABLE
+    VARIABLE,
+    OPERATOR,
+    CONTROL,
+    NEWLINE
 }
