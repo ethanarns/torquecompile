@@ -88,6 +88,24 @@ public class Lexer {
         return finalTokens;
     }
 
+    private boolean isDouble(String f) {
+        try {
+            Double.parseDouble(f);
+            return true;
+        } catch(NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isInteger(String f) {
+        try {
+            Integer.parseInt(f);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     public ArrayList<Token> parse(String input) {
         ArrayList<Token> finalTokens = new ArrayList<Token>();
         input = input.replace("\n",";");
@@ -122,10 +140,18 @@ public class Lexer {
                 valueString.startsWith("float")) {
                     finalTokens.add(new Token(Lexeme.DECLARE,valueString));
                 // Next, just functions
-                } else if (valueString.equals("function")) {
-                    finalTokens.add(new Token(Lexeme.FUNCTION,valueString));
+                } else if (valueString.startsWith("function")) {
+                    valueString = valueString.replace("function","").trim();
+                    finalTokens.add(new Token(Lexeme.FUNCTIONDEF,valueString));
+                // Is it a value?
                 } else {
-                    finalTokens.add(new Token(Lexeme.UNPARSED,valueString));
+                    if(isInteger(valueString)) {
+                        finalTokens.add(new Token(Lexeme.INTEGER,valueString));
+                    } else if (isDouble(valueString)) {
+                        finalTokens.add(new Token(Lexeme.DOUBLE,valueString));
+                    } else {
+                        finalTokens.add(new Token(Lexeme.UNPARSED,valueString));
+                    }
                 }
             } else {
                 finalTokens.add(t);
