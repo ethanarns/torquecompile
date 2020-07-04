@@ -2,6 +2,8 @@ package torquecompile;
 
 import java.util.ArrayList;
 
+import org.graalvm.compiler.nodes.graphbuilderconf.LoopExplosionPlugin.LoopExplosionKind;
+
 public class Lexer {
 
     public Lexer() {}
@@ -124,6 +126,24 @@ public class Lexer {
         }
         // Split up and name the rest
         finalTokens = parseTokens(finalTokens);
+        // Resolve variables
+        finalTokens = resolveVariables(finalTokens);
+        return finalTokens;
+    }
+
+    private ArrayList<Token> resolveVariables(ArrayList<Token> tokens) {
+        ArrayList<Token> finalTokens = new ArrayList<Token>();
+        for (int i = 0; i < tokens.size(); i++) {
+            Token t = tokens.get(i);
+            if (t.lex == Lexeme.DECLARE) {
+
+            } else if (t.lex == Lexeme.UNPARSED){
+
+            // Already decided
+            } else {
+                finalTokens.add(t);
+            }
+        }
         return finalTokens;
     }
 
@@ -149,6 +169,8 @@ public class Lexer {
                         finalTokens.add(new Token(Lexeme.INTEGER,valueString));
                     } else if (isDouble(valueString)) {
                         finalTokens.add(new Token(Lexeme.DOUBLE,valueString));
+                    } else if (valueString.equals("")) {
+                        // Do nothing
                     } else {
                         finalTokens.add(new Token(Lexeme.UNPARSED,valueString));
                     }
